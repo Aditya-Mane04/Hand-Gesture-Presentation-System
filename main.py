@@ -10,7 +10,7 @@ import numpy as np
 # Initialize registered_users dictionary
 registered_users = {}
 
-# Initialize gestures array
+# Initialize gestures dictionary
 gestures = []
 
 # Parameters
@@ -49,72 +49,14 @@ root.title("Login and Presentation")
 root.geometry("800x600")
 
 
-# Add Background Image to main window
+
 bg2 = tk.PhotoImage(file="C:/Users/user/PycharmProjects/GUI/bg2.png")
 background_label = tk.Label(root, image=bg2)
 background_label.place(relwidth=1, relheight=1)
 
-# Add Heading to main window
 heading_label = tk.Label(root, text="Hand Gesture System Login", font=("Comic Sans MS", 20, "bold"), fg='white', bg='#223053')
 heading_label.pack(pady=50)
 
-# Create and place username label and entry
-label_username = tk.Label(root, text="Username:", font=("Comic Sans MS", 12), fg='yellow', bg='#223053')
-label_username.pack(pady=10)
-entry_username = tk.Entry(root, font=("Helvetica", 14))
-entry_username.pack(pady=5)
-
-# Create and place password label and entry
-label_password = tk.Label(root, text="Password:", font=("Comic Sans MS", 12), fg='yellow', bg='#223053')
-label_password.pack(pady=10)
-entry_password = tk.Entry(root, show="*", font=("Comic Sans MS", 12))
-entry_password.pack(pady=5)
-
-# Create and place login button
-login_button = tk.Button(root, text="Login", command=check_credentials_and_run_presentation, font=("Comic Sans MS", 12))
-login_button.pack(pady=10)
-
-# Create and place register button
-register_button = tk.Button(root, text="Register", command=register_user, font=("Comic Sans MS", 12))
-register_button.pack(pady=20)
-
-# Start the main loop
-root.mainloop()
-
-# Release the camera when the application is closed
-cap.release()
-cv2.destroyAllWindows()
-
-#Function to write users credentials into a csv file
-def log_login(username, password):
-    now = datetime.now()
-    date_time = now.strftime("%Y-%m-%d %H:%M:%S")
-
-    file_is_empty = not os.path.isfile("login_log.csv") or os.stat("login_log.csv").st_size == 0
-
-    with open("login_log.csv", mode="a", newline="") as file:
-        writer = csv.writer(file)
-
-        if file_is_empty:
-            writer.writerow(["Username", "Password", "Timestamp"])
-
-        writer.writerow([username, password, date_time])
-
-#Function to Register A new User
-def register_user():
-    username = entry_username.get()
-    password = entry_password.get()
-
-    if username and password:
-        registered_users[username] = password
-        log_login(username, password)
-        messagebox.showinfo("Registration Successful", "User {} registered successfully".format(username))
-    else:
-        messagebox.showerror("Registration Failed", "Username and password are required")
-
-
-
-# Function to verify credentials and run system
 def check_credentials_and_run_presentation():
     username = entry_username.get()
     password = entry_password.get()
@@ -162,13 +104,12 @@ def run_presentation(username):
             yVal = int(np.interp(lmList[8][1], [150, height - 150], [0, height]))
             indexFinger = xVal, yVal
 
-            # Simple Gesture Algorithm
             if cy <= gestureThreshold:
                 if fingers == [1, 0, 0, 0, 0]:
                     timestamp = datetime.now()
                     gesture_name = "Left"
                     gestures.append((gesture_name, timestamp))
-                    log_gestures(username, gesture_name, timestamp) #Write gesture data into report csv file
+                    log_gestures(username, gesture_name, timestamp)
                     buttonPressed = True
                     if imgNumber > 0:
                         imgNumber -= 1
@@ -234,7 +175,6 @@ def run_presentation(username):
                 if j != 0:
                     cv2.line(imgCurrent, annotation[j - 1], annotation[j], (0, 0, 200), 12)
 
-        #Small Camera Setup on presentation window
         imgSmall = cv2.resize(img, (ws, hs))
         h, w, _ = imgCurrent.shape
         imgCurrent[0:hs, w - ws: w] = imgSmall
@@ -245,7 +185,8 @@ def run_presentation(username):
         if key == ord('q'):
             break
 
-#Function to log gestures into a csv file
+# Function to check credentials and run the presentation
+
 def log_gestures(username, gesture_name, timestamp):
     gestures_filename = f"{username}_gestures_log.csv"
 
@@ -255,3 +196,55 @@ def log_gestures(username, gesture_name, timestamp):
         if file_is_empty:
             writer.writerow(["Gesture name", "Timestamp"])
         writer.writerow([gesture_name, timestamp])
+
+def register_user():
+    username = entry_username.get()
+    password = entry_password.get()
+
+    if username and password:
+        registered_users[username] = password
+        log_login(username, password)
+        messagebox.showinfo("Registration Successful", "User {} registered successfully".format(username))
+    else:
+        messagebox.showerror("Registration Failed", "Username and password are required")
+
+def log_login(username, password):
+    now = datetime.now()
+    date_time = now.strftime("%Y-%m-%d %H:%M:%S")
+
+    file_is_empty = not os.path.isfile("login_log.csv") or os.stat("login_log.csv").st_size == 0
+
+    with open("login_log.csv", mode="a", newline="") as file:
+        writer = csv.writer(file)
+
+        if file_is_empty:
+            writer.writerow(["Username", "Password", "Timestamp"])
+
+        writer.writerow([username, password, date_time])
+
+# Create and place username label and entry
+label_username = tk.Label(root, text="Username:", font=("Comic Sans MS", 12), fg='yellow', bg='#223053')
+label_username.pack(pady=10)
+entry_username = tk.Entry(root, font=("Helvetica", 14))
+entry_username.pack(pady=5)
+
+# Create and place password label and entry
+label_password = tk.Label(root, text="Password:", font=("Comic Sans MS", 12), fg='yellow', bg='#223053')
+label_password.pack(pady=10)
+entry_password = tk.Entry(root, show="*", font=("Comic Sans MS", 12))
+entry_password.pack(pady=5)
+
+# Create and place login button
+login_button = tk.Button(root, text="Login", command=check_credentials_and_run_presentation, font=("Comic Sans MS", 12))
+login_button.pack(pady=10)
+
+# Create and place register button
+register_button = tk.Button(root, text="Register", command=register_user, font=("Comic Sans MS", 12))
+register_button.pack(pady=20)
+
+# Start the main loop
+root.mainloop()
+
+# Release the camera when the application is closed
+cap.release()
+cv2.destroyAllWindows()
