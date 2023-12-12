@@ -10,7 +10,7 @@ import numpy as np
 # Initialize registered_users dictionary
 registered_users = {}
 
-# Initialize gestures dictionary
+# Initialize gestures list
 gestures = []
 
 # Parameters
@@ -49,14 +49,16 @@ root.title("Login and Presentation")
 root.geometry("800x600")
 
 
-
-bg2 = tk.PhotoImage(file="C:/Users/user/PycharmProjects/GUI/bg2.png")
+# Add a background image to the window
+bg2 = tk.PhotoImage(file="C:/Users/user/PycharmProjects/GUI/bg2.png")#Insert you parth of file here
 background_label = tk.Label(root, image=bg2)
 background_label.place(relwidth=1, relheight=1)
 
+# Add heading to the main window
 heading_label = tk.Label(root, text="Hand Gesture System Login", font=("Comic Sans MS", 20, "bold"), fg='white', bg='#223053')
 heading_label.pack(pady=50)
 
+# Function to check the credentials and run system if authorised
 def check_credentials_and_run_presentation():
     username = entry_username.get()
     password = entry_password.get()
@@ -105,10 +107,13 @@ def run_presentation(username):
             indexFinger = xVal, yVal
 
             if cy <= gestureThreshold:
+                # Accessing list of fingers, returns 1 when up and 0 when down. Index 0-4 refer to Thumb,Index,Middle,Ring and Pnky Finger resp.
                 if fingers == [1, 0, 0, 0, 0]:
                     timestamp = datetime.now()
                     gesture_name = "Left"
+                    # Add Gesture Name and Time stamp to the gestures list
                     gestures.append((gesture_name, timestamp))
+                    # Write into gesture log file
                     log_gestures(username, gesture_name, timestamp)
                     buttonPressed = True
                     if imgNumber > 0:
@@ -186,7 +191,6 @@ def run_presentation(username):
             break
 
 # Function to check credentials and run the presentation
-
 def log_gestures(username, gesture_name, timestamp):
     gestures_filename = f"{username}_gestures_log.csv"
 
